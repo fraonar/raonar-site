@@ -1,40 +1,288 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Global Elements ---
-    const navLinks = document.querySelectorAll('.nav-link');
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-    const sections = document.querySelectorAll('section');
-    const currentYearSpan = document.getElementById('current-year');
+    // Set body overflow hidden initially for the terminal screen
+    document.body.style.overflow = 'hidden';
 
-    // --- Header & Navigation ---
-    const header = document.querySelector('.header');
-    const hamburgerMenu = document.getElementById('hamburger-menu');
-    const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
-    const closeMobileNavButton = document.getElementById('close-mobile-nav');
+    // --- Terminal Boot Sequence Elements ---
+    const terminalContent = document.getElementById('terminal-content');
+    const countdownElement = document.getElementById('countdown');
+    const terminalScreen = document.getElementById('terminal');
+    const mainPortfolioContent = document.getElementById('main-content');
 
-    // --- Header Typewriter Logo ---
-    const headerTypewriterLogoElement = document.getElementById('header-typewriter-logo');
-    const headerTypewriterPhrases = ["coding...", "building...", "debugging..."];
-    let headerPhraseIndex = 0;
-    let headerCharIndex = 0;
-    let isHeaderDeleting = false;
-    const headerTypingSpeed = 100; // Speed for header text
-    const headerDeletingSpeed = 50; // Speed for header text deleting
-    const headerPauseBeforeDelete = 1000; // Pause before deleting header text
-    const headerPauseBeforeType = 500; // Pause before typing next header text
+    const bootMessages = [
+        "Checking hardware... OK",
+        "Memory test... 16384MB OK",
+        "CPU initialization... OK",
+        "Storage devices detected... 2",
+        "Network interface up... 192.168.1.100",
+        "Loading system libraries...",
+        "Starting daemons...",
+        "System time synchronized",
+        "Security protocols enabled",
+        "User session starting..."
+    ];
 
-    // --- Hero Section Typewriter ---
+    let bootMessageIndex = 0;
+    let countdown = 3;
+
+    // Function to display boot messages sequentially
+    function displayBootMessage() {
+        if (bootMessageIndex < bootMessages.length) {
+            const p = document.createElement('p');
+            p.textContent = `> ${bootMessages[bootMessageIndex]}`;
+            terminalContent.appendChild(p);
+            terminalContent.scrollTop = terminalContent.scrollHeight; // Scroll to bottom
+            bootMessageIndex++;
+            setTimeout(displayBootMessage, 300); // Delay for next message
+        } else {
+            // All boot messages displayed, start countdown
+            const p = document.createElement('p');
+            p.innerHTML = `> System ready in <span id="countdown">3</span>...`;
+            terminalContent.appendChild(p);
+            countdownElement.textContent = countdown; // Initialize countdown display
+            terminalContent.scrollTop = terminalContent.scrollHeight; // Scroll to bottom
+            const finalP = terminalContent.querySelector('p:last-child');
+            if (finalP) {
+                finalP.classList.remove('hidden'); // Make the countdown visible
+            }
+            startCountdown();
+        }
+    }
+
+    // Function to handle countdown before revealing main content
+    function startCountdown() {
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                fadeTerminalOut();
+            }
+        }, 1000);
+    }
+
+    // Function to fade out terminal and reveal main content
+    function fadeTerminalOut() {
+        terminalScreen.style.opacity = '0';
+        terminalScreen.style.transition = 'opacity 1s ease-out';
+        setTimeout(() => {
+            terminalScreen.style.display = 'none';
+            mainPortfolioContent.classList.remove('hidden');
+            mainPortfolioContent.style.opacity = '0';
+            setTimeout(() => {
+                mainPortfolioContent.style.opacity = '1';
+                mainPortfolioContent.style.transition = 'opacity 1s ease-in';
+                document.body.style.overflow = ''; // Allow scrolling again
+                initializeMainPortfolio(); // Initialize main portfolio elements
+            }, 50); // Small delay to ensure display:none is applied before transition
+        }, 1000); // Match transition duration
+    }
+
+    // Start the boot sequence when the page loads
+    displayBootMessage();
+
+    // --- Typewriter effect for hero subtitle ---
     const typewriterTextElement = document.getElementById('typewriter-text');
-    const typewriterPhrases = ["Passionate about Web Dev", "Dedicated to Embedded Systems", "Exploring OS Design", "Building Innovative Solutions"];
+    const phrases = [
+        "coding... building... debugging...",
+        "crafting digital experiences.",
+        "innovating with purpose."
+    ];
     let phraseIndex = 0;
     let charIndex = 0;
     let isDeleting = false;
-    const typingSpeed = 80; // Faster typing for sleek feel
-    const deletingSpeed = 40; // Faster deleting
-    const pauseBeforeDelete = 1200; // Shorter pause
-    const pauseBeforeType = 400; // Shorter pause
+    let typingSpeed = 100; // milliseconds per character
 
-    // --- Time Display ---
-    const timeDisplay = document.getElementById('time-display');
+    function typeWriterEffect() {
+        const currentPhrase = phrases[phraseIndex];
+        let displayText = '';
+
+        if (isDeleting) {
+            displayText = currentPhrase.substring(0, charIndex - 1);
+            charIndex--;
+        } else {
+            displayText = currentPhrase.substring(0, charIndex + 1);
+            charIndex++;
+        }
+
+        typewriterTextElement.textContent = displayText;
+
+        let currentTypingSpeed = typingSpeed;
+        if (isDeleting) {
+            currentTypingSpeed /= 2; // Faster deletion
+        }
+
+        if (!isDeleting && charIndex === currentPhrase.length) {
+            currentTypingSpeed = 1500; // Pause at end of phrase
+            isDeleting = true;
+        } else if (isDeleting && charIndex === 0) {
+            isDeleting = false;
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            currentTypingSpeed = 500; // Pause before typing new phrase
+        }
+
+        setTimeout(typeWriterEffect, currentTypingSpeed);
+    }
+
+    // --- Typewriter effect for header logo ---
+    const headerTypewriterLogoElement = document.getElementById('header-typewriter-logo');
+    const logoText = "RAONAR OS";
+    let logoCharIndex = 0;
+    let headerTypingSpeed = 150;
+
+    function headerTypeWriterEffect() {
+        if (logoCharIndex < logoText.length) {
+            headerTypewriterLogoElement.textContent += logoText.charAt(logoCharIndex);
+            logoCharIndex++;
+            setTimeout(headerTypeWriterEffect, headerTypingSpeed);
+        }
+    }
+
+    // --- Dynamic Time Display ---
+    function updateTimeDisplay() {
+        const timeDisplay = document.getElementById('time-display');
+        const now = new Date();
+        const options = {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        const formattedTime = now.toLocaleTimeString('en-US', options);
+        timeDisplay.textContent = formattedTime;
+    }
+
+    // --- Update Current Year for Footer ---
+    function updateCurrentYear() {
+        const currentYearElement = document.getElementById('current-year');
+        currentYearElement.textContent = new Date().getFullYear();
+    }
+
+    // --- Hamburger Menu Functionality ---
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+    const closeMobileNav = document.getElementById('close-mobile-nav');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+    hamburgerMenu.addEventListener('click', () => {
+        mobileNavOverlay.classList.add('open');
+    });
+
+    closeMobileNav.addEventListener('click', () => {
+        mobileNavOverlay.classList.remove('open');
+    });
+
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            mobileNavOverlay.classList.remove('open');
+        });
+    });
+
+    // --- Smooth Scrolling for Navigation Links ---
+    document.querySelectorAll('a.nav-link[href^="#"], a.mobile-nav-link[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+
+            // Update active state for desktop nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
+
+    // --- Water-like Background Effect ---
+    const waterCanvas = document.getElementById('water-canvas');
+    const waterCtx = waterCanvas.getContext('2d');
+    let waterWidth, waterHeight;
+    const waterParticles = [];
+    const numWaterParticles = 200; // Increased for more density
+    const waterParticleSize = 2;
+    const waterParticleSpeed = 0.5;
+
+    function resizeWaterCanvas() {
+        waterWidth = window.innerWidth;
+        waterHeight = document.body.scrollHeight; // Make canvas height match total scrollable height
+        waterCanvas.width = waterWidth;
+        waterCanvas.height = waterHeight;
+    }
+
+    function createWaterParticles() {
+        waterParticles.length = 0; // Clear existing particles
+        for (let i = 0; i < numWaterParticles; i++) {
+            waterParticles.push({
+                x: Math.random() * waterWidth,
+                y: Math.random() * waterHeight,
+                speedX: (Math.random() - 0.5) * waterParticleSpeed,
+                speedY: (Math.random() - 0.5) * waterParticleSpeed,
+                radius: Math.random() * waterParticleSize + 1,
+                color: `rgba(0, 255, 209, ${0.1 + Math.random() * 0.4})` // Varying opacity
+            });
+        }
+    }
+
+    function updateWaterParticles() {
+        waterCtx.clearRect(0, 0, waterWidth, waterHeight);
+        waterCtx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Subtle fade effect
+        waterCtx.fillRect(0, 0, waterWidth, waterHeight);
+
+        for (let i = 0; i < numWaterParticles; i++) {
+            const p = waterParticles[i];
+
+            p.x += p.speedX;
+            p.y += p.speedY;
+
+            // Bounce off edges
+            if (p.x < 0 || p.x > waterWidth) p.speedX *= -1;
+            if (p.y < 0 || p.y > waterHeight) p.speedY *= -1;
+
+            // Draw particle
+            waterCtx.beginPath();
+            waterCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            waterCtx.fillStyle = p.color;
+            waterCtx.shadowColor = p.color;
+            waterCtx.shadowBlur = p.radius * 2; // Glow effect
+            waterCtx.fill();
+        }
+    }
+
+    function renderWater() {
+        updateWaterParticles();
+        requestAnimationFrame(renderWater);
+    }
+
+    // --- Scroll Reveal Animation ---
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    const scrollRevealOptions = {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: 0.2 // Trigger when 20% of the section is visible
+    };
+
+    const scrollRevealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('reveal');
+                // For sections, update active nav link
+                if (entry.target.tagName === 'SECTION') {
+                    const id = entry.target.id;
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            } else {
+                entry.target.classList.remove('reveal'); // Optional: reset on scroll out
+            }
+        });
+    }, scrollRevealOptions);
 
     // --- Audio Control ---
     const backgroundAudio = document.getElementById('background-audio');
@@ -42,346 +290,116 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioIcon = document.getElementById('audio-icon');
     let isAudioPlaying = false; // Track audio state
 
-    // --- Water Background Effect ---
-    const waterCanvas = document.getElementById('water-canvas');
-    const ctx = waterCanvas.getContext('2d');
-    let rafIdWater; // For requestAnimationFrame for water
+    // --- Robot Head JavaScript (Integrated) ---
+    const robotHead = document.getElementById('robot-head');
+    const leftEye = document.getElementById('left-eye');
+    const rightEye = document.getElementById('right-eye');
+    const leftPupil = leftEye ? leftEye.querySelector('.pupil') : null; // Add null check
+    const rightPupil = rightEye ? rightEye.querySelector('.pupil') : null; // Add null check
 
-    const ripples = [];
-    const maxRipples = 15; // Allow more ripples
-    const rippleRadiusStart = 0;
-    const rippleMaxRadius = 250; // Larger max radius for more impact
-    const rippleSpeed = 3; // Faster expansion
-    const rippleAlphaDecay = 0.008; // Faster fade out for new ripples, but still visible
+    function movePupil(eyeElement, pupilElement, mouseX, mouseY) {
+        if (!eyeElement || !pupilElement) return; // Ensure elements exist
 
-    // Set canvas size
-    function resizeWaterCanvas() {
-        waterCanvas.width = window.innerWidth;
-        waterCanvas.height = window.innerHeight;
-    }
-    resizeWaterCanvas();
-    window.addEventListener('resize', resizeWaterCanvas);
+        const eyeRect = eyeElement.getBoundingClientRect();
+        const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+        const eyeCenterY = eyeRect.top + eyeRect.height / 2;
 
-    // Main render loop for water effect
-    function renderWater() {
-        ctx.clearRect(0, 0, waterCanvas.width, waterCanvas.height); // Clear canvas
+        const angle = Math.atan2(mouseY - eyeCenterY, mouseX - eyeCenterX);
 
-        for (let i = 0; i < ripples.length; i++) {
-            const ripple = ripples[i];
-            ripple.radius += rippleSpeed;
-            ripple.alpha -= rippleAlphaDecay; // Fade out
+        const maxPupilMoveDistance = (eyeRect.width / 2) - (pupilElement.offsetWidth / 2) - 2;
 
-            if (ripple.alpha <= 0 || ripple.radius > rippleMaxRadius) {
-                ripples.splice(i, 1); // Remove faded ripples
-                i--;
-                continue;
-            }
+        const pupilX = maxPupilMoveDistance * Math.cos(angle);
+        const pupilY = maxPupilMoveDistance * Math.sin(angle);
 
-            ctx.beginPath();
-            ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(0, 255, 209, ${ripple.alpha})`; // Use accent color
-            ctx.lineWidth = 3; // Thicker lines for more visibility
-            ctx.stroke();
-        }
-        rafIdWater = requestAnimationFrame(renderWater);
-    }
-    renderWater(); // Start the water animation loop
-
-    // Add new ripple on mouse move
-    waterCanvas.addEventListener('mousemove', (e) => {
-        if (ripples.length < maxRipples) {
-            ripples.push({
-                x: e.clientX,
-                y: e.clientY,
-                radius: rippleRadiusStart,
-                alpha: 1
-            });
-        }
-    });
-
-    // --- 3D Cube Logo Setup ---
-    let cubeRenderer, cubeScene, cubeCamera, cubeMesh; // Define globally for potential external access/debugging
-
-    function initCube() {
-        const canvas = document.getElementById('cubeCanvas');
-        if (!canvas) {
-            console.error("Cube canvas not found!");
-            return;
-        }
-
-        const container = canvas.parentElement; // Get the parent container for sizing
-
-        // Renderer
-        cubeRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        cubeRenderer.setPixelRatio(window.devicePixelRatio);
-
-        // Scene
-        cubeScene = new THREE.Scene();
-
-        // Camera
-        // Use container's dimensions for aspect ratio
-        cubeCamera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
-        cubeCamera.position.set(2, 2, 4);
-        cubeScene.add(cubeCamera);
-
-        // Lights
-        const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-        hemi.position.set(0, 5, 0);
-        cubeScene.add(hemi);
-
-        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-        dir.position.set(5, 10, 7);
-        cubeScene.add(dir);
-
-        // Cube creation
-        const size = 1;
-        const geo = new THREE.BoxGeometry(size, size, size);
-        const mats = [];
-
-        // Define colors for cube faces using accent colors
-        const colors = [
-            new THREE.Color(0x00FFD1), // Accent
-            new THREE.Color(0xFF3CAC), // Alt Accent
-            new THREE.Color(0x00FFD1).multiplyScalar(0.8),
-            new THREE.Color(0xFF3CAC).multiplyScalar(0.8),
-            new THREE.Color(0x00FFD1).multiplyScalar(0.6),
-            new THREE.Color(0xFF3CAC).multiplyScalar(0.6)
-        ];
-
-        for (let i = 0; i < 6; i++) {
-            mats.push(new THREE.MeshStandardMaterial({ color: colors[i] }));
-        }
-
-        cubeMesh = new THREE.Mesh(geo, mats);
-        cubeScene.add(cubeMesh);
-
-        // Animation loop for cube
-        function animateCube() {
-            requestAnimationFrame(animateCube);
-            cubeMesh.rotation.x += 0.005;
-            cubeMesh.rotation.y += 0.01;
-            cubeRenderer.render(cubeScene, cubeCamera);
-        }
-
-        // Handle resizing of the cube canvas
-        function resizeCubeCanvas() {
-            // Get actual computed dimensions of the canvas element
-            const rect = canvas.getBoundingClientRect();
-            const w = rect.width;
-            const h = rect.height;
-
-            // Crucial: Explicitly set canvas HTML attributes to match CSS size
-            canvas.width = w;
-            canvas.height = h;
-
-            if (w === 0 || h === 0) {
-                console.warn("Cube canvas has zero dimensions. Cannot resize renderer. Current dimensions (getBoundingClientRect):", w, h);
-                return;
-            }
-            cubeRenderer.setSize(w, h);
-            cubeCamera.aspect = w / h;
-            cubeCamera.updateProjectionMatrix();
-        }
-
-        resizeCubeCanvas(); // Initial resize call immediately after renderer creation
-        animateCube(); // Start cube animation
-        window.addEventListener('resize', resizeCubeCanvas); // Listen for window resize
+        pupilElement.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
     }
 
-    // Call initCube after the window has fully loaded to ensure canvas dimensions are ready
-    window.addEventListener('load', () => {
-        if (window.THREE) {
-            initCube();
-        } else {
-            console.error("THREE.js not loaded, cannot initialize cube.");
+    document.addEventListener('mousemove', (event) => {
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+
+        movePupil(leftEye, leftPupil, mouseX, mouseY);
+        movePupil(rightEye, rightPupil, mouseX, mouseY);
+
+        if (robotHead) {
+            const headRect = robotHead.getBoundingClientRect();
+            const headCenterX = headRect.left + headRect.width / 2;
+            const headCenterY = headRect.top + headRect.height / 2;
+
+            const diffX = mouseX - headCenterX;
+            const diffY = mouseY - headCenterY;
+
+            robotHead.style.transform = `translate(${diffX / 20}px, ${diffY / 20}px)`;
         }
     });
 
-
-    // --- Initializations (Other parts of the site) ---
-    updateCurrentYear();
-    updateTimeDisplay();
-    setInterval(updateTimeDisplay, 1000); // Update time every second
-    typeWriterEffect(); // Start hero typewriter animation
-    headerTypeWriterEffect(); // Start header typewriter animation
-
-    // --- Event Listeners ---
-
-    // Smooth scrolling for navigation links
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = link.getAttribute('href').substring(1);
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.scrollIntoView({ behavior: 'smooth' });
-            }
-            // Update active class for desktop nav
-            navLinks.forEach(nav => nav.classList.remove('active'));
-            link.classList.add('active');
-        });
-    });
-
-    // Mobile nav toggle
-    hamburgerMenu.addEventListener('click', () => {
-        mobileNavOverlay.classList.add('active');
-        hamburgerMenu.classList.add('active'); // Animate hamburger to X
-        document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
-    });
-
-    closeMobileNavButton.addEventListener('click', () => {
-        mobileNavOverlay.classList.remove('active');
-        hamburgerMenu.classList.remove('active'); // Animate X back to hamburger
-        document.body.style.overflow = ''; // Restore scrolling
-    });
-
-    mobileNavLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = link.getAttribute('href').substring(1);
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.scrollIntoView({ behavior: 'smooth' });
-            }
-            closeMobileNav(); // Close mobile menu after clicking a link
-        });
-    });
-
-    function closeMobileNav() {
-        mobileNavOverlay.classList.remove('active');
-        hamburgerMenu.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    // Audio toggle for background music
-    audioToggleButton.addEventListener('click', () => {
-        if (backgroundAudio.paused) {
-            backgroundAudio.play().then(() => {
-                isAudioPlaying = true;
-                audioIcon.classList.remove('fa-volume-mute');
-                audioIcon.classList.add('fa-volume-up');
-                audioToggleButton.title = 'Mute Background Music';
-            }).catch(error => {
-                console.error("Audio playback failed:", error);
-                // Inform user if autoplay is blocked (e.g., if audio isn't user-initiated)
-                // Removed formStatus reference as form is removed.
-                // You might want a small, temporary message box here if needed.
-            });
-        } else {
-            backgroundAudio.pause();
-            isAudioPlaying = false;
-            audioIcon.classList.remove('fa-volume-up');
-            audioIcon.classList.add('fa-volume-mute');
-            audioToggleButton.title = 'Play Background Music';
+    document.addEventListener('mouseleave', () => {
+        if (robotHead) {
+            robotHead.style.transform = `translate(0px, 0px)`;
+        }
+        if (leftPupil) {
+            leftPupil.style.transform = `translate(0px, 0px)`;
+        }
+        if (rightPupil) {
+            rightPupil.style.transform = `translate(0px, 0px)`;
         }
     });
 
-    // --- Functions ---
+    // Removed the line that hides the cursor: document.body.style.cursor = 'none';
 
-    // Update current year in footer
-    function updateCurrentYear() {
-        currentYearSpan.textContent = new Date().getFullYear();
-    }
 
-    // Update time display
-    function updateTimeDisplay() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
-    }
-
-    // Typewriter effect for hero subtitle
-    function typeWriterEffect() {
-        const currentPhrase = typewriterPhrases[phraseIndex];
-        if (isDeleting) {
-            // Delete characters
-            typewriterTextElement.textContent = currentPhrase.substring(0, charIndex - 1);
-            charIndex--;
-            if (charIndex === 0) {
-                isDeleting = false;
-                phraseIndex = (phraseIndex + 1) % typewriterPhrases.length;
-                setTimeout(typeWriterEffect, pauseBeforeType);
+    // --- Main Initialization Function ---
+    function initializeMainPortfolio() {
+        audioToggleButton.addEventListener('click', () => {
+            if (!isAudioPlaying) {
+                backgroundAudio.play().then(() => {
+                    isAudioPlaying = true;
+                    audioIcon.classList.remove('fa-volume-mute');
+                    audioIcon.classList.add('fa-volume-up');
+                    audioToggleButton.title = 'Mute Background Music';
+                }).catch(error => {
+                    console.error("Audio playback failed:", error);
+                });
             } else {
-                setTimeout(typeWriterEffect, deletingSpeed);
-            }
-        } else {
-            // Type characters
-            typewriterTextElement.textContent = currentPhrase.substring(0, charIndex + 1);
-            charIndex++;
-            if (charIndex === currentPhrase.length) {
-                isDeleting = true;
-                setTimeout(typeWriterEffect, pauseBeforeDelete);
-            } else {
-                setTimeout(typeWriterEffect, typingSpeed);
-            }
-        }
-    }
-
-    // Typewriter effect for header logo
-    function headerTypeWriterEffect() {
-        const currentPhrase = headerTypewriterPhrases[headerPhraseIndex];
-        if (isHeaderDeleting) {
-            // Delete characters
-            headerTypewriterLogoElement.textContent = currentPhrase.substring(0, headerCharIndex - 1);
-            headerCharIndex--;
-            if (headerCharIndex === 0) {
-                isHeaderDeleting = false;
-                headerPhraseIndex = (headerPhraseIndex + 1) % headerTypewriterPhrases.length;
-                setTimeout(headerTypeWriterEffect, headerPauseBeforeType);
-            } else {
-                setTimeout(headerTypeWriterEffect, headerDeletingSpeed);
-            }
-        } else {
-            // Type characters
-            headerTypewriterLogoElement.textContent = currentPhrase.substring(0, headerCharIndex + 1);
-            headerCharIndex++;
-            if (headerCharIndex === currentPhrase.length) {
-                isHeaderDeleting = true;
-                setTimeout(headerTypeWriterEffect, headerPauseBeforeDelete);
-            } else {
-                setTimeout(headerTypeWriterEffect, headerTypingSpeed);
-            }
-        }
-    }
-
-
-    // Intersection Observer for Scroll Reveal Animations
-    const scrollRevealOptions = {
-        threshold: 0.1, // Element is 10% visible
-        rootMargin: '0px 0px -80px 0px' // Start animation a bit earlier
-    };
-
-    const scrollRevealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Apply active class to trigger animation
-                entry.target.classList.add('active');
-
-                // If it's a scroll-reveal-item, apply staggered delay
-                if (entry.target.classList.contains('scroll-reveal-item')) {
-                    const delay = parseFloat(entry.target.dataset.scrollDelay || 0);
-                    entry.target.style.transitionDelay = `${delay}s`;
-                }
-                // observer.unobserve(entry.target); // Uncomment to animate only once
-            } else {
-                // entry.target.classList.remove('active'); // Uncomment to re-trigger animation on scroll back up
-                // Reset transition delay when out of view
-                if (entry.target.classList.contains('scroll-reveal-item')) {
-                    entry.target.style.transitionDelay = '0s';
-                }
+                backgroundAudio.pause();
+                isAudioPlaying = false;
+                audioIcon.classList.remove('fa-volume-up');
+                audioIcon.classList.add('fa-volume-mute');
+                audioToggleButton.title = 'Play Background Music';
             }
         });
-    }, scrollRevealOptions);
 
-    // Observe sections and individual items
-    sections.forEach(section => {
-        scrollRevealObserver.observe(section);
-    });
-    document.querySelectorAll('.scroll-reveal-item').forEach(item => {
-        scrollRevealObserver.observe(item);
-    });
+        // --- Initializations for Main Portfolio ---
+        updateCurrentYear();
+        updateTimeDisplay();
+        setInterval(updateTimeDisplay, 1000);
+        typeWriterEffect();
+        headerTypeWriterEffect();
 
-    // Removed Contact Form Validation as the form is removed.
+        // Initialize water canvas
+        resizeWaterCanvas();
+        createWaterParticles(); // Initialize particles
+        renderWater(); // Start water effect for main portfolio
+
+        // Note: The initCube() call is removed here as the 3D cube is replaced.
+        // if (window.THREE) { // Ensure THREE.js is loaded
+        //     initCube();
+        // } else {
+        //     console.error("THREE.js not loaded, cannot initialize cube.");
+        // }
+
+        // Observe sections and individual items for scroll reveal
+        sections.forEach(section => {
+            scrollRevealObserver.observe(section);
+        });
+        document.querySelectorAll('.scroll-reveal-item').forEach(item => {
+            scrollRevealObserver.observe(item);
+        });
+
+        // Re-calculate water canvas height on window resize and also update particles
+        window.addEventListener('resize', () => {
+            resizeWaterCanvas();
+            createWaterParticles(); // Recreate particles for new dimensions
+        });
+    }
 });
