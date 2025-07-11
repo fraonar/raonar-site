@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mohammed Raonar | Tech Innovator</title>
-    <meta name="description" content="Portfolio of Mohammed Raonar - Web Development, Embedded Systems, and OS Design Specialist. Building the future, one innovative solution at a time.">
-    <meta name="keywords" content="Mohammed Raonar, web development, embedded systems, operating systems, OS design, portfolio, software engineer, developer, programmer, tech, innovation, cyber, pixel art">
+    <title>RAONAR OS | Mohammed Raonar</title> <!-- Updated title for boot sequence -->
+    <meta name="description" content="Terminal-style boot sequence website and portfolio of Mohammed Raonar - Web Development, Embedded Systems, and OS Design Specialist. Building the future, one innovative solution at a time.">
+    <meta name="keywords" content="Mohammed Raonar, web development, embedded systems, operating systems, OS design, portfolio, software engineer, developer, programmer, tech, innovation, cyber, pixel art, terminal, boot, glitch">
     <meta name="author" content="Mohammed Raonar">
 
     <!-- Open Graph / Facebook -->
@@ -33,305 +33,477 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Three.js CDN for the 3D Cube Logo -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r138/three.min.js"></script>
-
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Inline styles for the Robot Head (ONLY for the robot and its container) -->
+    <style>
+        /* Adjust hero-avatar-container to center the robot */
+        .hero-avatar-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 20px; /* Add some padding below the robot */
+        }
+
+        /* Robot Head Container */
+        #robot-container {
+            position: relative; /* Changed from fixed to relative */
+            width: 100px; /* Adjust size as needed for the hero section */
+            height: 100px; /* Adjust size as needed for the hero section */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1; /* Ensure it's above other content in its div */
+            pointer-events: none; /* Allow clicks to pass through the container */
+            transition: transform 0.1s ease-out; /* Smooth movement for the head */
+            margin-bottom: 20px; /* Add some space below the robot */
+        }
+
+        /* Robot Head */
+        #robot-head {
+            width: 80px; /* Smaller head size */
+            height: 80px;
+            background-color: #6a0dad; /* Deep purple for a cute look */
+            border-radius: 50%; /* Circular head */
+            border: 4px solid #4b0082; /* Darker purple border */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.2); /* Soft shadow and inner glow */
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Hide parts of eyes that go outside */
+            transition: transform 0.1s ease-out; /* Smooth movement for the head */
+        }
+
+        /* Robot Eye */
+        .eye {
+            width: 28px; /* Eye size */
+            height: 28px;
+            background-color: #ffffff; /* White eyes */
+            border-radius: 50%; /* Circular eyes */
+            border: 2px solid #333; /* Dark border for definition */
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Hide pupil if it goes outside eye */
+        }
+
+        /* Positioning for left and right eyes */
+        #left-eye {
+            left: 15px;
+            top: 25px;
+        }
+
+        #right-eye {
+            right: 15px;
+            top: 25px;
+        }
+
+        /* Robot Pupil */
+        .pupil {
+            width: 12px; /* Pupil size */
+            height: 12px;
+            background-color: #000000; /* Black pupils */
+            border-radius: 50%; /* Circular pupils */
+            position: absolute;
+            transition: transform 0.05s linear; /* Smooth pupil movement */
+        }
+
+        /* Removed: Hide default cursor to make robot the primary visual indicator */
+        /* body {
+            cursor: none;
+        } */
+    </style>
+
 </head>
-<body>
-    <!-- Water-like Background Canvas - This is your interactive background -->
-    <canvas id="water-canvas" class="water-canvas"></canvas>
+<body class="bg-black text-white">
+    <!-- Interactive Background (Particles) - This is for the boot screen and main content -->
+    <div id="interactive-bg"></div>
 
-    <!-- Navigation Header -->
-    <header class="header">
-        <div class="container nav-container">
-            <a href="#" class="logo">
-                <span id="header-typewriter-logo"></span>
-            </a>
-            <nav class="nav-menu">
-                <ul class="nav-list">
-                    <li><a href="#hero" class="nav-link active">Home</a></li>
-                    <li><a href="#about" class="nav-link">About</a></li>
-                    <li><a href="#projects-built" class="nav-link">Built</a></li> <!-- Updated link for built projects -->
-                    <li><a href="#projects" class="nav-link">Future</a></li> <!-- Updated link for future projects -->
-                    <li><a href="#contact" class="nav-link">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="header-right">
-                <div class="time-display" id="time-display"></div>
-                <button class="hamburger-menu" id="hamburger-menu">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </button>
-            </div>
+    <!-- Terminal Boot Screen -->
+    <div id="terminal" class="container mx-auto px-4 py-8 h-screen flex flex-col justify-end">
+        <div id="terminal-content" class="terminal-text flex-grow overflow-y-auto">
+            <p>> Booting RAONAR.EXE...</p>
+            <p>> Initializing system components...</p>
+            <p>> Loading kernel modules...</p>
+            <p>> Mounting filesystems...</p>
+            <p>> Starting network services...</p>
+            <p>> Launching GUI subsystem...</p>
+            <p class="hidden">> System ready in <span id="countdown">3</span>...</p> <!-- Hidden initially, shown by JS -->
         </div>
-    </header>
-
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay" id="mobile-nav-overlay">
-        <button class="close-mobile-nav" id="close-mobile-nav">&times;</button>
-        <ul class="mobile-nav-list">
-            <li><a href="#hero" class="mobile-nav-link" data-section="hero">Home</a></li>
-            <li><a href="#about" class="mobile-nav-link" data-section="about">About</a></li>
-            <li><a href="#projects-built" class="mobile-nav-link" data-section="projects-built">Built</a></li>
-            <li><a href="#projects" class="mobile-nav-link" data-section="projects">Future</a></li>
-            <li><a href="#contact" class="mobile-nav-link" data-section="contact">Contact</a></li>
-        </ul>
+        <div class="terminal-text mt-4">
+            <span>> </span><span class="cursor">_</span>
+        </div>
     </div>
 
-    <!-- Hero Section -->
-    <section id="hero" class="hero-section full-screen scroll-reveal">
-        <div class="container hero-content">
-            <div class="hero-avatar-container">
-                <!-- 3D Cube Logo Canvas -->
-                <canvas id="cubeCanvas" class="hero-cube-canvas"></canvas>
-            </div>
-            <h1 class="hero-title">Hi, I'm Mohammed Raonar</h1>
-            <p class="hero-subtitle" id="typewriter-text"></p>
-            <a href="#projects-built" class="cta-button glow-on-hover">View Projects <i class="fas fa-arrow-right"></i></a>
-        </div>
-    </section>
+    <!-- Main Content (hidden initially, revealed after boot sequence) -->
+    <div id="main-content" class="hidden w-full min-h-screen">
+        <!-- Water-like Background Canvas - This is your interactive background for the portfolio -->
+        <canvas id="water-canvas" class="water-canvas"></canvas>
 
-    <!-- About Section -->
-    <section id="about" class="about-section section-padding scroll-reveal">
-        <div class="container">
-            <h2 class="section-title glow-text">About Me</h2>
-            <div class="about-content">
-            <p class="about-paragraph scroll-reveal-item" data-scroll-delay="0.1">
-                <em>"I'm a technology enthusiast with a deep passion for crafting solutions that make everyday life smarter, simpler, and more connected. My journey spans web development, embedded systems, and operating system design, where I've consistently worked to turn complex technical challenges into intuitive and meaningful user experiences."</em>
-            </p>
-
-                <p class="about-paragraph scroll-reveal-item" data-scroll-delay="0.2">
-                    Driven by curiosity and creativity, my mission is to redefine how we engage with the digital world—building powerful, accessible innovations that push the limits of what technology can achieve.
-                </p>
-
-                <h3 class="about-subsection-title glow-text scroll-reveal-item" data-scroll-delay="0.3">Learning..</h3>
-                <div class="skills-grid">
-                    <div class="skill-category glass-card scroll-reveal-item" data-scroll-delay="0.4">
-                        <i class="fas fa-laptop-code skill-icon"></i>
-                        <h3>Web Development</h3>
-                        <ul class="skill-list">
-                            <li>React, Next.js, Vue</li>
-                            <li>Node.js, Express, Django</li>
-                            <li>HTML5, CSS3, JavaScript</li>
-                            <li>REST APIs, GraphQL</li>
-                            <li>UI/UX Design</li>
-                        </ul>
-                    </div>
-                    <div class="skill-category glass-card scroll-reveal-item" data-scroll-delay="0.5">
-                        <i class="fas fa-microchip skill-icon"></i>
-                        <h3>Embedded Systems</h3>
-                        <ul class="skill-list">
-                            <li>ARM Cortex-M, ESP32</li>
-                            <li>FreeRTOS, Zephyr</li>
-                            <li>C/C++, Assembly</li>
-                            <li>IoT Protocols (MQTT, CoAP)</li>
-                            <li>Hardware Debugging</li>
-                        </ul>
-                    </div>
-                    <div class="skill-category glass-card scroll-reveal-item" data-scroll-delay="0.6">
-                        <i class="fas fa-server skill-icon"></i>
-                        <h3>OS Design</h3>
-                        <ul class="skill-list">
-                            <li>Linux Kernel Dev</li>
-                            <li>System Programming</li>
-                            <li>Memory Management</li>
-                            <li>Process Scheduling</li>
-                            <li>Device Drivers</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Built Section -->
-     
-    <section id="projects-built" class="projects-section section-padding">
-        <div class="container">
-            <h3 class="about-subsection-title glow-text scroll-reveal-item" data-scroll-delay="0.3">Built</h3>
-            <div class="projects-grid">
-                <!-- Project Card for TabSnoop -->
-                <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.1">
-                    <div class="project-image-container">
-                        <img src="https://placehold.co/600x400/000000/00FFD1/png?text=TabSnoop" alt="TabSnoop Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
-                    </div>
-                    <div class="project-info">
-                        <h3>TabSnoop</h3>
-                        <p>TabSnoop is a lightweight, privacy-focused Chrome extension that tracks time spent on each website, helping users understand browsing habits, boost productivity, and promote digital wellness.</p>
-                        <div class="project-tech">
-                            <span>Chrome Extension</span><span>JavaScript</span><span>Productivity</span>
-                        </div>
-                        <div class="project-buttons">
-                            <a href="https://github.com/fraonar/tabsnoop" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Section (Future Projects) -->
-    <section id="projects" class="projects-section section-padding">
-        <div class="container">
-            <h3 class="about-subsection-title glow-text scroll-reveal-item" data-scroll-delay="0.3">To be built in the next 362 days...</h3>
-            <div class="projects-grid">
-                <!-- Project Card 1 (Existing) -->
-                <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.1">
-                    <div class="project-image-container">
-                        <img src="https://placehold.co/600x400/000000/00FFD1/png?text=Web+App" alt="Project 1 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
-                    </div>
-                    <div class="project-info">
-                        <h3>QuantumSync Web App</h3>
-                        <p>A real-time collaborative platform built with Node.js and WebSockets, featuring secure data synchronization.</p>
-                        <div class="project-tech">
-                            <span>Node.js</span><span>Express</span><span>WebSockets</span><span>MongoDB</span>
-                        </div>
-                        <div class="project-buttons">
-                            <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
-                            <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Project Card 2 (Existing) -->
-                <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.2">
-                    <div class="project-image-container">
-                        <img src="https://placehold.co/600x400/000000/00FFD1/png?text=IoT+Device" alt="Project 2 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
-                    </div>
-                    <div class="project-info">
-                        <h3>Smart Home Hub (IoT)</h3>
-                        <p>An embedded system for smart home automation, controlling lights and sensors via a custom mobile app.</p>
-                        <div class="project-tech">
-                            <span>ESP32</span><span>FreeRTOS</span><span>MQTT</span><span>C++</span>
-                        </div>
-                        <div class="project-buttons">
-                            <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
-                            <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Project Card 3 (Existing) -->
-                <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.3">
-                    <div class="project-image-container">
-                        <img src="https://placehold.co/600x400/000000/00FFD1/png?text=OS+Kernel" alt="Project 3 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
-                    </div>
-                    <div class="project-info">
-                        <h3>Mini-Kernel for ARM</h3>
-                        <p>A lightweight, custom operating system kernel developed for ARM Cortex-M microcontrollers, focusing on task scheduling.</p>
-                        <div class="project-tech">
-                            <span>C</span><span>Assembly</span><span>ARM</span><span>Multitasking</span>
-                        </div>
-                        <div class="project-buttons">
-                            <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
-                            <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Project Card 4 (Existing) -->
-                <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.4">
-                    <div class="project-image-container">
-                        <img src="https://placehold.co/600x400/000000/00FFD1/png?text=Data+Viz" alt="Project 4 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
-                    </div>
-                    <div class="project-info">
-                        <h3>Interactive Data Dashboard</h3>
-                        <p>A React-based dashboard for visualizing complex datasets with custom charts and real-time updates.</p>
-                        <div class="project-tech">
-                            <span>React</span><span>D3.js</span><span>TypeScript</span><span>REST API</span>
-                        </div>
-                        <div class="project-buttons">
-                            <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
-                            <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Project Card 5 (Existing) -->
-                <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.5">
-                    <div class="project-image-container">
-                        <img src="https://placehold.co/600x400/000000/00FFD1/png?text=Robotics" alt="Project 5 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
-                    </div>
-                    <div class="project-info">
-                        <h3>Autonomous Robotics Platform</h3>
-                        <p>Software and hardware integration for a small autonomous robot, including navigation and obstacle avoidance.</p>
-                        <div class="project-tech">
-                            <span>Python</span><span>ROS</span><span>Raspberry Pi</span><span>Sensors</span>
-                        </div>
-                        <div class="project-buttons">
-                            <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
-                            <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Project Card 6 (Existing) -->
-                <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.6">
-                    <div class="project-image-container">
-                        <img src="https://placehold.co/600x400/000000/00FFD1/png?text=Blockchain" alt="Project 6 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
-                    </div>
-                    <div class="project-info">
-                        <h3>Decentralized Identity System</h3>
-                        <p>A proof-of-concept blockchain-based identity management system for secure and verifiable credentials.</p>
-                        <div class="project-tech">
-                            <span>Solidity</span><span>Ethereum</span><span>Web3.js</span><span>IPFS</span>
-                        </div>
-                        <div class="project-buttons">
-                            <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
-                            <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="contact-section section-padding">
-            <div class="container">
-                <h2 class="section-title glow-text scroll-reveal">Let's Connect</h2>
-                <p class="contact-intro scroll-reveal-item" data-scroll-delay="0.1">
-                    Whether you have an innovative idea, a collaboration opportunity, or just want to say hello, I'd love to hear from you.
-                </p>
-                <div class="contact-content">
-                    <div class="social-links glass-card scroll-reveal-item" data-scroll-delay="0.2">
-                        <h3>Find Me Online</h3>
-                        <a href="http://github.com/fraonar" target="_blank" rel="noopener noreferrer" class="social-link glow-on-hover">
-                            <i class="fab fa-github"></i> GitHub
-                        </a>
-                        <a href="https://www.linkedin.com/in/mohammed-raonar-861b49355/" target="_blank" rel="noopener noreferrer" class="social-link glow-on-hover">
-                            <i class="fab fa-linkedin"></i> LinkedIn
-                        </a>
-                        <a href="mailto:raonar95@gmail.com" class="social-link glow-on-hover">
-                            <i class="fas fa-envelope"></i> Email
-                        </a>
-                        <!-- Add more social links as needed -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Fixed Animated Footer -->
-        <footer class="footer">
-            <div class="container">
-                <p>&copy; <span id="current-year"></span> Mohammed Raonar. All rights reserved.</p>
-                <div class="audio-control">
-                    <button id="audio-toggle" class="audio-button glow-on-hover">
-                        <i class="fas fa-volume-mute" id="audio-icon"></i>
+        <!-- Navigation Header -->
+        <header class="header">
+            <div class="container nav-container">
+                <a href="#" class="logo">
+                    <span id="header-typewriter-logo"></span>
+                </a>
+                <nav class="nav-menu">
+                    <ul class="nav-list">
+                        <li><a href="#hero" class="nav-link active">Home</a></li>
+                        <li><a href="#about" class="nav-link">About</a></li>
+                        <li><a href="#projects-built" class="nav-link">Built</a></li>
+                        <li><a href="#projects" class="nav-link">Future</a></li>
+                        <li><a href="#contact" class="nav-link">Contact</a></li>
+                    </ul>
+                </nav>
+                <div class="header-right">
+                    <div class="time-display" id="time-display"></div>
+                    <button class="hamburger-menu" id="hamburger-menu">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
                     </button>
-                    <audio id="background-audio" loop>
-                        <!-- IMPORTANT: For security and licensing, no actual audio source is provided. -->
-                        <!-- You MUST add your own subtle, looping background audio file here. -->
-                        <!-- Example: <source src="path/to/your/audio.mp3" type="audio/mpeg"> -->
-                        <!-- Make sure the audio is royalty-free or you have the rights to use it. -->
-                    </audio>
                 </div>
             </div>
-        </footer>
+        </header>
 
-        <!-- Main JavaScript File -->
-        <script src="main.js"></script>
+        <!-- Mobile Navigation Overlay -->
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+            <button class="close-mobile-nav" id="close-mobile-nav">&times;</button>
+            <ul class="mobile-nav-list">
+                <li><a href="#hero" class="mobile-nav-link" data-section="hero">Home</a></li>
+                <li><a href="#about" class="mobile-nav-link" data-section="about">About</a></li>
+                <li><a href="#projects-built" class="mobile-nav-link" data-section="projects-built">Built</a></li>
+                <li><a href="#projects" class="mobile-nav-link" data-section="projects">Future</a></li>
+                <li><a href="#contact" class="mobile-nav-link" data-section="contact">Contact</a></li>
+            </ul>
+        </div>
+
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section full-screen scroll-reveal">
+            <div class="container hero-content">
+                <div class="hero-avatar-container">
+                    <!-- Robot Head Container - Replaces cubeCanvas -->
+                    <div id="robot-container">
+                        <div id="robot-head">
+                            <div id="left-eye" class="eye">
+                                <div class="pupil"></div>
+                            </div>
+                            <div id="right-eye" class="eye">
+                                <div class="pupil"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h1 class="hero-title">Hi, I'm Mohammed Raonar</h1>
+                <p class="hero-subtitle" id="typewriter-text"></p>
+                <a href="#projects-built" class="cta-button glow-on-hover">View Projects <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section section-padding scroll-reveal">
+            <div class="container">
+                <h2 class="section-title glow-text">About Me</h2>
+                <div class="about-content">
+                    <p class="about-paragraph scroll-reveal-item" data-scroll-delay="0.1">
+                        I'm a technology enthusiast with a deep passion for crafting solutions that make everyday life smarter, simpler, and more connected. My journey spans web development, embedded systems, and operating system design, where I've consistently worked to turn complex technical challenges into intuitive and meaningful user experiences.
+                    </p>
+                    <p class="about-paragraph scroll-reveal-item" data-scroll-delay="0.2">
+                        Driven by curiosity and creativity, my mission is to redefine how we engage with the digital world—building powerful, accessible innovations that push the limits of what technology can achieve.
+                    </p>
+
+                    <h3 class="about-subsection-title glow-text scroll-reveal-item" data-scroll-delay="0.3">Learning</h3>
+                    <div class="skills-grid">
+                        <div class="skill-category glass-card scroll-reveal-item" data-scroll-delay="0.4">
+                            <i class="fas fa-laptop-code skill-icon"></i>
+                            <h3>Web Development</h3>
+                            <ul class="skill-list">
+                                <li>React, Next.js, Vue</li>
+                                <li>Node.js, Express, Django</li>
+                                <li>HTML5, CSS3, JavaScript</li>
+                                <li>REST APIs, GraphQL</li>
+                                <li>UI/UX Design</li>
+                            </ul>
+                        </div>
+                        <div class="skill-category glass-card scroll-reveal-item" data-scroll-delay="0.5">
+                            <i class="fas fa-microchip skill-icon"></i>
+                            <h3>Embedded Systems</h3>
+                            <ul class="skill-list">
+                                <li>ARM Cortex-M, ESP32</li>
+                                <li>FreeRTOS, Zephyr</li>
+                                <li>C/C++, Assembly</li>
+                                <li>IoT Protocols (MQTT, CoAP)</li>
+                                <li>Hardware Debugging</li>
+                            </ul>
+                        </div>
+                        <div class="skill-category glass-card scroll-reveal-item" data-scroll-delay="0.6">
+                            <i class="fas fa-server skill-icon"></i>
+                            <h3>OS Design</h3>
+                            <ul class="skill-list">
+                                <li>Linux Kernel Dev</li>
+                                <li>System Programming</li>
+                                <li>Memory Management</li>
+                                <li>Process Scheduling</li>
+                                <li>Device Drivers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Built Section -->
+        <section id="projects-built" class="projects-section section-padding">
+            <div class="container">
+                <h2 class="section-title glow-text scroll-reveal">Projects Built</h2>
+                <div class="projects-grid">
+                    <!-- Project Card for TabSnoop -->
+                    <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.1">
+                        <div class="project-image-container">
+                            <img src="https://placehold.co/600x400/000000/00FFD1/png?text=TabSnoop" alt="TabSnoop Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
+                        </div>
+                        <div class="project-info">
+                            <h3>TabSnoop</h3>
+                            <p>TabSnoop is a lightweight, privacy-focused Chrome extension that tracks time spent on each website, helping users understand browsing habits, boost productivity, and promote digital wellness.</p>
+                            <div class="project-tech">
+                                <span>Chrome Extension</span><span>JavaScript</span><span>Productivity</span>
+                            </div>
+                            <div class="project-buttons">
+                                <a href="https://github.com/fraonar/tabsnoop" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        <!-- Projects Section (Future Projects) -->
+        <section id="projects" class="projects-section section-padding">
+            <div class="container">
+                <h2 class="section-title glow-text scroll-reveal">To be built in the next 362 days...</h2>
+                <div class="projects-grid">
+                    <!-- Project Card 1 (Existing) -->
+                    <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.1">
+                        <div class="project-image-container">
+                            <img src="https://placehold.co/600x400/000000/00FFD1/png?text=Web+App" alt="Project 1 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
+                        </div>
+                        <div class="project-info">
+                            <h3>QuantumSync Web App</h3>
+                            <p>A real-time collaborative platform built with Node.js and WebSockets, featuring secure data synchronization.</p>
+                            <div class="project-tech">
+                                <span>Node.js</span><span>Express</span><span>WebSockets</span><span>MongoDB</span>
+                            </div>
+                            <div class="project-buttons">
+                                <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 2 (Existing) -->
+                    <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.2">
+                        <div class="project-image-container">
+                            <img src="https://placehold.co/600x400/000000/00FFD1/png?text=IoT+Device" alt="Project 2 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
+                        </div>
+                        <div class="project-info">
+                            <h3>Smart Home Hub (IoT)</h3>
+                            <p>An embedded system for smart home automation, controlling lights and sensors via a custom mobile app.</p>
+                            <div class="project-tech">
+                                <span>ESP32</span><span>FreeRTOS</span><span>MQTT</span><span>C++</span>
+                            </div>
+                            <div class="project-buttons">
+                                <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 3 (Existing) -->
+                    <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.3">
+                        <div class="project-image-container">
+                            <img src="https://placehold.co/600x400/000000/00FFD1/png?text=OS+Kernel" alt="Project 3 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
+                        </div>
+                        <div class="project-info">
+                            <h3>Mini-Kernel for ARM</h3>
+                            <p>A lightweight, custom operating system kernel developed for ARM Cortex-M microcontrollers, focusing on task scheduling.</p>
+                            <div class="project-tech">
+                                <span>C</span><span>Assembly</span><span>ARM</span><span>Multitasking</span>
+                            </div>
+                            <div class="project-buttons">
+                                <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 4 (Existing) -->
+                    <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.4">
+                        <div class="project-image-container">
+                            <img src="https://placehold.co/600x400/000000/00FFD1/png?text=Data+Viz" alt="Project 4 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
+                        </div>
+                        <div class="project-info">
+                            <h3>Interactive Data Dashboard</h3>
+                            <p>A React-based dashboard for visualizing complex datasets with custom charts and real-time updates.</p>
+                            <div class="project-tech">
+                                <span>React</span><span>D3.js</span><span>TypeScript</span><span>REST API</span>
+                            </div>
+                            <div class="project-buttons">
+                                <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 5 (Existing) -->
+                    <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.5">
+                        <div class="project-image-container">
+                            <img src="https://placehold.co/600x400/000000/00FFD1/png?text=Robotics" alt="Project 5 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
+                        </div>
+                        <div class="project-info">
+                            <h3>Autonomous Robotics Platform</h3>
+                            <p>Software and hardware integration for a small autonomous robot, including navigation and obstacle avoidance.</p>
+                            <div class="project-tech">
+                                <span>Python</span><span>ROS</span><span>Raspberry Pi</span><span>Sensors</span>
+                            </div>
+                            <div class="project-buttons">
+                                <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 6 (Existing) -->
+                    <div class="project-card glass-card scroll-reveal-item" data-scroll-delay="0.6">
+                        <div class="project-image-container">
+                            <img src="https://placehold.co/600x400/000000/00FFD1/png?text=Blockchain" alt="Project 6 Screenshot" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/00FFD1?text=Image+Error';">
+                        </div>
+                        <div class="project-info">
+                            <h3>Decentralized Identity System</h3>
+                            <p>A proof-of-concept blockchain-based identity management system for secure and verifiable credentials.</p>
+                            <div class="project-tech">
+                                <span>Solidity</span><span>Ethereum</span><span>Web3.js</span><span>IPFS</span>
+                            </div>
+                            <div class="project-buttons">
+                                <a href="#" target="_blank" class="button glow-on-hover">Live Demo <i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" target="_blank" class="button button-secondary glow-on-hover">GitHub Repo <i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact" class="contact-section section-padding">
+                <div class="container">
+                    <h2 class="section-title glow-text scroll-reveal">Let's Connect</h2>
+                    <p class="contact-intro scroll-reveal-item" data-scroll-delay="0.1">
+                        Whether you have an innovative idea, a collaboration opportunity, or just want to say hello, I'd love to hear from you.
+                    </p>
+                    <div class="contact-content">
+                        <div class="social-links glass-card scroll-reveal-item" data-scroll-delay="0.2">
+                            <h3>Find Me Online</h3>
+                            <a href="http://github.com/fraonar" target="_blank" rel="noopener noreferrer" class="social-link glow-on-hover">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="https://www.linkedin.com/in/mohammed-raonar-861b49355/" target="_blank" rel="noopener noreferrer" class="social-link glow-on-hover">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </a>
+                            <a href="mailto:raonar95@gmail.com" class="social-link glow-on-hover">
+                                <i class="fas fa-envelope"></i> Email
+                            </a>
+                            <!-- Add more social links as needed -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Fixed Animated Footer -->
+            <footer class="footer">
+                <div class="container">
+                    <p>&copy; <span id="current-year"></span> Mohammed Raonar. All rights reserved.</p>
+                    <div class="audio-control">
+                        <button id="audio-toggle" class="audio-button glow-on-hover">
+                            <i class="fas fa-volume-mute" id="audio-icon"></i>
+                        </button>
+                        <audio id="background-audio" loop>
+                            <!-- IMPORTANT: For security and licensing, no actual audio source is provided. -->
+                            <!-- You MUST add your own subtle, looping background audio file here. -->
+                            <!-- Example: <source src="path/to/your/audio.mp3" type="audio/mpeg"> -->
+                            <!-- Make sure the audio is royalty-free or you have the rights to use it. -->
+                        </audio>
+                    </div>
+                </div>
+            </footer>
+    </div>
+
+    <!-- Main JavaScript File -->
+    <script src="main.js"></script>
+
+    <!-- Inline JavaScript for the Robot Head (ONLY for the robot functionality) -->
+    <script>
+        // Get references to the DOM elements
+        const robotHead = document.getElementById('robot-head');
+        const leftEye = document.getElementById('left-eye');
+        const rightEye = document.getElementById('right-eye');
+        const leftPupil = leftEye ? leftEye.querySelector('.pupil') : null; // Add null check
+        const rightPupil = rightEye ? rightEye.querySelector('.pupil') : null; // Add null check
+
+        // Function to calculate the position of the pupil based on cursor
+        function movePupil(eyeElement, pupilElement, mouseX, mouseY) {
+            if (!eyeElement || !pupilElement) return; // Ensure elements exist
+
+            const eyeRect = eyeElement.getBoundingClientRect();
+            const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+            const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+
+            const angle = Math.atan2(mouseY - eyeCenterY, mouseX - eyeCenterX);
+
+            const maxPupilMoveDistance = (eyeRect.width / 2) - (pupilElement.offsetWidth / 2) - 2;
+
+            const pupilX = maxPupilMoveDistance * Math.cos(angle);
+            const pupilY = maxPupilMoveDistance * Math.sin(angle);
+
+            pupilElement.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+        }
+
+        document.addEventListener('mousemove', (event) => {
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+
+            movePupil(leftEye, leftPupil, mouseX, mouseY);
+            movePupil(rightEye, rightPupil, mouseX, mouseY);
+
+            if (robotHead) {
+                // Calculate the center of the robot head in relation to the viewport
+                const headRect = robotHead.getBoundingClientRect();
+                const headCenterX = headRect.left + headRect.width / 2;
+                const headCenterY = headRect.top + headRect.height / 2;
+
+                // Calculate the difference between cursor and head center
+                const diffX = mouseX - headCenterX;
+                const diffY = mouseY - headCenterY;
+
+                // Apply a slight transform to the head for subtle movement
+                robotHead.style.transform = `translate(${diffX / 20}px, ${diffY / 20}px)`;
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            if (robotHead) {
+                robotHead.style.transform = `translate(0px, 0px)`;
+            }
+            if (leftPupil) {
+                leftPupil.style.transform = `translate(0px, 0px)`;
+            }
+            if (rightPupil) {
+                rightPupil.style.transform = `translate(0px, 0px)`;
+            }
+        });
+
+
+    </script>
 </body>
 </html>
